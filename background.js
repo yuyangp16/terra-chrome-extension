@@ -75,7 +75,7 @@ Return your final response in valid JSON format with the following keys:
               model: "gpt-4o",
               messages: [{ role: "user", content: prompt }],
               max_tokens: 800,
-              temperature: 0.3
+              temperature: 0.5
             })
           })
           .then(response => response.json())
