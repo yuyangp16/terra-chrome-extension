@@ -14,15 +14,15 @@ document.addEventListener("DOMContentLoaded", function() {
       // Build three sections for Materials, Carbon Footprint, and Brand Accountability using the paragraphs from AI
       const sectionsDiv = document.getElementById("sectionsContainer");
       let html = "";
-      html += `<div class="section">
+      html += `<div class="section" style="font-size:15px; line-height:20px; margin-top:-20px;">
         <h2>Materials</h2>
         <p>${analysis.materials || "No information available."}</p>
       </div>`;
-      html += `<div class="section">
+      html += `<div class="section" style="font-size:15px; line-height:20px; margin-top:-20px;">
         <h2>Carbon Footprint</h2>
         <p>${analysis.carbon_footprint || "No information available."}</p>
       </div>`;
-      html += `<div class="section">
+      html += `<div class="section" style="font-size:15px; line-height:20px; margin-top:-20px;">
         <h2>Brand Accountability</h2>
         <p>${analysis.brand_accountability || "No information available."}</p>
       </div>`;
