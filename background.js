@@ -1,5 +1,5 @@
 // Replace with your actual OpenAI API key
-const OPENAI_API_KEY = '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';
+const OPENAI_API_KEY = '<your API key>';
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === "analyze_product") {
