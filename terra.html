@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            width: 350px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 3px;
+            align-self: flex-start;
+        }
+        
+        
+        .logo img {
+            width: 240px;
+            height: 80px;
+        }
+        
+        .leaf-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .leaf-container img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        
+        .rating-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+        }
+        
+        .rating-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #555;
+        }
+        
+        .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .icon-x {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        
+        .icon-check {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 20px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            color: #666;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            margin-top: 5px;
+        }
+        
+        .explore-button {
+            background-color: #bae2b9;
+            color: #333;
+            padding: 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .learn-more {
+            text-align: center;
+            color: #666;
+            text-decoration: none;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="https://i.imgur.com/0aryVUI.png" alt="Terra logo">
+        </div>
+
+    </div>
+    
+    <ul class="rating-list">
+        <li class="rating-item">
+            <span class="icon icon-x">✕</span>
+            3M Severe Risk ESG Rating
+        </li>
+        <li class="rating-item">
+            <span class="icon icon-x">✕</span>
+            Class action lawsuit - oil spill
+        </li>
+        <li class="rating-item">
+            <span class="icon icon-x">✕</span>
+            PFAS chemicals
+        </li>
+        <li class="rating-item">
+            <span class="icon icon-x">✕</span>
+            Plastic packaging
+        </li>
+        <li class="rating-item">
+            <span class="icon icon-check">✓</span>
+            100% Recycled content
+        </li>
+    </ul>
+    <h3 style="text-align: center; margin: 12px 0;"> Certified planet protector! </h3>
+    <div class="leaf-container">
+      <img src="https://i.imgur.com/T5WahaY.png" alt="Leaf">
+      <img src="https://i.imgur.com/T5WahaY.png" alt="Leaf">
+      <img src="https://i.imgur.com/T5WahaY.png" alt="Leaf">
+      <img src="https://i.imgur.com/T5WahaY.png" alt="Leaf">
+      <img src="https://i.imgur.com/T5WahaY.png" alt="Leaf">
+  </div>
+    <div class="divider"></div>
+    <h2 style="text-align: center; margin: 15px 0;"> 3 Green Options Found!</h2>
+    <button class="explore-button">Explore Green Options</button>
+    <a href="#" class="learn-more">Learn More</a>
+</body>
+</html>

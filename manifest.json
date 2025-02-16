@@ -1,0 +1,37 @@
+{
+    "manifest_version": 3,
+    "name": "Terra ESG Analyzer",
+    "version": "1.1",
+    "description": "Scrapes Walmart product info and analyzes ESG sustainability data.",
+    "permissions": [
+      "activeTab",
+      "scripting",
+      "storage"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "content_scripts": [
+    {
+        "matches": [
+        "https://*.walmart.com/*",
+        "https://*.amazon.com/*",
+        "https://*.target.com/*",
+        "https://*.bestbuy.com/*"
+        ],
+        "js": ["content_script.js"]
+    }
+    ],
+    "web_accessible_resources": [{
+      "resources": [
+        "learn_more.html",
+        "complaint.html"
+      ],
+      "matches": ["<all_urls>"]
+    }]
+  }
+  
+  
