@@ -48,8 +48,8 @@ Assign a score between 1 and 5:
 4: Good performance. Demonstrates clear environmental strategies, targets, and ongoing improvements.
 5: Exemplary performance. Strong leadership in sustainability, transparent reporting, and consistent third-party validation.
 
-3. Search online (using at most 3 reputable websites) and provide sustainability highlights/problems in fewer than 5 bullet points (less than 10 words each), focusing on aspects like recycled materials, plastic packaging, lawsuits, and chemicals. Be critical about your response.
-4. If the ESG Environmental Score is below 3, provide alternative green options.
+3. Search online (using at most 3 reputable websites) and provide fewer than five sustainability highlights/problems (less than 5 words each), focusing on aspects like recycled materials, plastic packaging, lawsuits, and chemicals. Before each bullet point, add a string False if it is a negative point and a string True if it is a positive point.
+4. If the ESG Environmental Score is below 3, search and find at most three alternative green options. Each alternative should be an object with keys "name" (the product's name) and "website link" (the URL to the google search result of the product), so that they can be displayed as clickable hyperlinks.
 5. Provide three separate paragraphs (each one approximately 200–250 words) that explain:
    a. **Materials:** The sustainable sourcing and recycled content of the product's materials.
    b. **Carbon Footprint:** The product’s carbon emissions from manufacturing and shipping.
@@ -57,13 +57,13 @@ Assign a score between 1 and 5:
 6. Also provide up to 3 relevant websites you used, along with a short paragraph (under 75 words) for each.
 Return your final response in valid JSON format with the following keys:
    - "esg_score" (number, 1-5),
-   - "sustainability_highlights" (array of bullet points),
-   - "green_options" (array of alternative options),
+   - "sustainability_highlights" (array of strings),
+   - "green_options" (array of objects, each with "name" and "link"),
    - "materials" (string, paragraph on Materials),
    - "carbon_footprint" (string, paragraph on Carbon Footprint),
    - "brand_accountability" (string, paragraph on Brand Accountability),
    - "sources" (array of objects, each with "website" (a URL) and "description")
-   `;
+          `;
           
           fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
@@ -75,66 +75,59 @@ Return your final response in valid JSON format with the following keys:
               model: "gpt-4o",
               messages: [{ role: "user", content: prompt }],
               max_tokens: 800,
-              temperature: 0.7
+              temperature: 0.3
             })
           })
           .then(response => response.json())
-.then(data => {
-    console.log("OpenAI API Response:", data); // Debugging log
+          .then(data => {
+            console.log("OpenAI API Response:", data); // Debugging log
 
-    if (data.error || !data.choices || !data.choices[0]?.message?.content) {
-        sendResponse({ error: data.error?.message || "Unexpected API response format." });
-        return;
-    }
-
-    const aiResponse = data.choices[0].message.content.trim();
-    console.log("Raw AI Response:", aiResponse);
-
-    // Extract JSON inside ```json ... ```
-    const jsonMatch = aiResponse.match(/```json([\s\S]*?)```/);
-    if (!jsonMatch) {
-        sendResponse({ error: "Response does not contain valid JSON." });
-        return;
-    }
-
-    try {
-        const result = JSON.parse(jsonMatch[1].trim());
-
-        let esgScore = result.esg_score;
-        let numLeaves = 1;
-        if (typeof esgScore === 'number') {
-            numLeaves = esgScore;
-        }
-
-        let leaves = Array.from({ length: numLeaves }, (_, i) => ({ icon: "🍃", label: `Leaf ${i+1}` }));
-
-        chrome.storage.local.set({ analysisData: {
-            productName: productSpecs.productName,
-            leaves: leaves,
-            sustainability_highlights: result.sustainability_highlights || [],
-            green_options: result.green_options || [],
-            sources: result.sources || [],
-            materials: result.materials || "",
-            carbon_footprint: result.carbon_footprint || "",
-            brand_accountability: result.brand_accountability || ""
-        }});
-
-        sendResponse({
-            leaves: leaves,
-            sustainability_highlights: result.sustainability_highlights || [],
-            green_options: result.green_options || [],
-            sources: result.sources || [],
-            materials: result.materials || "",
-            carbon_footprint: result.carbon_footprint || "",
-            brand_accountability: result.brand_accountability || ""
-        });
-            } catch (e) {
-                sendResponse({ error: "Failed to parse AI response." });
+            if (data.error || !data.choices || !data.choices[0]?.message?.content) {
+              sendResponse({ error: data.error?.message || "Unexpected API response format." });
+              return;
             }
-        })
-        .catch(err => {
+
+            const aiResponse = data.choices[0].message.content.trim();
+            console.log("Raw AI Response:", aiResponse);
+
+            // Extract JSON inside ```json ... ```
+            const jsonMatch = aiResponse.match(/```json([\s\S]*?)```/);
+            if (!jsonMatch) {
+              sendResponse({ error: "Response does not contain valid JSON." });
+              return;
+            }
+
+            try {
+              const result = JSON.parse(jsonMatch[1].trim());
+              const esgScore = result.esg_score;
+              
+              chrome.storage.local.set({ analysisData: {
+                productName: productSpecs.productName,
+                esg_score: esgScore,
+                sustainability_highlights: result.sustainability_highlights || [],
+                green_options: result.green_options || [],
+                sources: result.sources || [],
+                materials: result.materials || "",
+                carbon_footprint: result.carbon_footprint || "",
+                brand_accountability: result.brand_accountability || ""
+              }});
+
+              sendResponse({
+                esg_score: esgScore,
+                sustainability_highlights: result.sustainability_highlights || [],
+                green_options: result.green_options || [],
+                sources: result.sources || [],
+                materials: result.materials || "",
+                carbon_footprint: result.carbon_footprint || "",
+                brand_accountability: result.brand_accountability || ""
+              });
+            } catch (e) {
+              sendResponse({ error: "Failed to parse AI response." });
+            }
+          })
+          .catch(err => {
             sendResponse({ error: "Error calling OpenAI API: " + err.message });
-        });
+          });
 
         });
       } else {
@@ -144,22 +137,21 @@ Return your final response in valid JSON format with the following keys:
     return true;
   }
 
-    else if (request.action === "prepare_complaint") {
-        // Retrieve analysis data (including product name) from chrome.storage
-        chrome.storage.local.get("analysisData", function(data) {
-            if (!data.analysisData || !data.analysisData.productName) {
-                sendResponse({ error: "No product analysis data available. Please run analysis first." });
-                return;
-            }
-            
-            const productName = data.analysisData.productName;
-            
-            // Build a new prompt for drafting a complaint email.
-            const complaintPrompt = `
+  else if (request.action === "prepare_complaint") {
+    // (Complaint code remains unchanged)
+    chrome.storage.local.get("analysisData", function(data) {
+      if (!data.analysisData || !data.analysisData.productName) {
+        sendResponse({ error: "No product analysis data available. Please run analysis first." });
+        return;
+      }
+      
+      const productName = data.analysisData.productName;
+      
+      const complaintPrompt = `
  You are an AI assistant. Given the product name:
     "${productName}"
     
-    Please search online to find product's brand and the brand's customer service email address for this product (if available) and draft a complaint report email in the following format:
+    Please search online to find product's brand and the brand's email address (if available) and draft a complaint report email in the following format:
     
     Dear [brand] Team,
 
@@ -176,49 +168,45 @@ Return your final response in valid JSON format with the following keys:
     Return your final response in valid JSON format with keys:
        - "brand_email" (string, the email address found, or "Not found" if unavailable),
        - "complaint_email" (string, the full drafted email text).
-            `;
+          `;
+      
+      fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + OPENAI_API_KEY
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: complaintPrompt }],
+          max_tokens: 500,
+          temperature: 0.7
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          sendResponse({ error: data.error.message });
+        } else {
+          try {
+            const aiResponse = data.choices[0].message.content;
+            const complaintResult = JSON.parse(aiResponse);
             
-            // Call the OpenAI API with the complaint prompt
-            fetch("https://api.openai.com/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + OPENAI_API_KEY
-                },
-                body: JSON.stringify({
-                    model: "gpt-3.5-turbo",
-                    messages: [{ role: "user", content: complaintPrompt }],
-                    max_tokens: 500,
-                    temperature: 0.7
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    sendResponse({ error: data.error.message });
-                } else {
-                    try {
-                        const aiResponse = data.choices[0].message.content;
-                        const complaintResult = JSON.parse(aiResponse);
-                        
-                        // Save complaint data in storage for the complaint page
-                        chrome.storage.local.set({ complaintData: {
-                            brand_email: complaintResult.brand_email || "Not found",
-                            complaint_email: complaintResult.complaint_email || ""
-                        }}, function() {
-                            // Instead of opening complaint.html here, just respond success.
-                            sendResponse({ success: true });
-                        });
-                    } catch (e) {
-                        sendResponse({ error: "Failed to parse AI response for complaint." });
-                    }
-                }
-            })
-            .catch(err => {
-                sendResponse({ error: "Error calling OpenAI API for complaint: " + err.message });
+            chrome.storage.local.set({ complaintData: {
+              brand_email: complaintResult.brand_email || "Not found",
+              complaint_email: complaintResult.complaint_email || ""
+            }}, function() {
+              sendResponse({ success: true });
             });
-        });
-        return true;
-    }
-    
+          } catch (e) {
+            sendResponse({ error: "Failed to parse AI response for complaint." });
+          }
+        }
+      })
+      .catch(err => {
+        sendResponse({ error: "Error calling OpenAI API for complaint: " + err.message });
+      });
+    });
+    return true;
+  }
 });
